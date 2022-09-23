@@ -4,3 +4,5 @@ testing:
 clean:
 	rm -f main *.o
 	
+install:
+	cp mawscpp.h ~/local/include
