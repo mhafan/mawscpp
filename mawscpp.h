@@ -7,7 +7,7 @@
 #include <vector>
 
 // ---------------------------------------------------------------------------
-//
+// Rozhrani MAWSCPP - napojeni na moji AWS Lambda -> S3
 namespace mawscpp {
     // -----------------------------------------------------------------------
     //
@@ -18,11 +18,13 @@ namespace mawscpp {
     // prebira ze systemovych promennych
     // MAWSGO_EXP_URL
     // MAWSGO_EXP_KEY
+    // -----------------------------------------------------------------------
     struct Connection {
         //
         rstring url;
         rstring appKey;
 
+        // -------------------------------------------------------------------
         //
         Connection() {
             //
@@ -42,85 +44,93 @@ namespace mawscpp {
             }
         }
 
+        // -------------------------------------------------------------------
         //
         Connection(const rstring &anURL, const rstring &anKey) : url(anURL), appKey(anKey) {}
 
-        //
+        // -------------------------------------------------------------------
+        // HTTP POST na url+apiKey
         bool    post(const rstring &body) const  {
-        //
-        bool retCode = false;
-        CURL *curl = nullptr;
-        CURLcode res = CURLE_FAILED_INIT;
-        struct curl_slist *headers = NULL;
-        char errbuf[CURL_ERROR_SIZE] = { 0, };
-        long response_code = 0;
-        FILE *devnull = fopen("/dev/null", "w+");
-
-        //
-        auto _xapi = rstring("x-api-key: ") + appKey;
-
-        //
-        curl = curl_easy_init();
-        if (curl == nullptr) {
+            // ---------------------------------------------------------------
             //
-            goto cleanup;
-        }
+            bool retCode = false;
+            CURL *curl = nullptr;
+            CURLcode res = CURLE_FAILED_INIT;
+            struct curl_slist *headers = NULL;
+            char errbuf[CURL_ERROR_SIZE] = { 0, };
+            long response_code = 0;
 
-        //
-        curl_easy_setopt(curl, CURLOPT_VERBOSE, 0L);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, devnull);
+            // ---------------------------------------------------------------
+            // toto se prdne do hlavicky dotazu
+            auto _xapi = rstring("x-api-key: ") + appKey;
 
-        //
-        headers = curl_slist_append(headers, "Expect:");
-        headers = curl_slist_append(headers, "Content-Type: application/json");
-        headers = curl_slist_append(headers, _xapi.c_str());
-        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+            // ---------------------------------------------------------------
+            // nastartuj kontext dotazu
+            curl = curl_easy_init();
+            if (curl == nullptr) {
+                //
+                goto cleanup;
+            }
 
-        //
-        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, body.c_str());
-        curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, -1L);
+            // ---------------------------------------------------------------
+            // beztak to pise na obrazovku. Tady nutno rict, ze vsechny me
+            // pokusy potlacit vypisy knihovny curl na obrazovku "zlyhaly".
+            curl_easy_setopt(curl, CURLOPT_VERBOSE, 0L);
+            curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, errbuf);
 
-        //
-        curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+            // ---------------------------------------------------------------
+            // hlavicka
+            headers = curl_slist_append(headers, "Expect:");
+            headers = curl_slist_append(headers, "Content-Type: application/json");
+            headers = curl_slist_append(headers, _xapi.c_str());
+            curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
-        //
-        curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
-        curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, errbuf);
+            // ---------------------------------------------------------------
+            // telicko
+            curl_easy_setopt(curl, CURLOPT_POSTFIELDS, body.c_str());
+            curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, -1L);
 
-        //
-        res = curl_easy_perform(curl);
-        if(res != CURLE_OK) {
+            // kam to pujde
+            curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+
+            // ---------------------------------------------------------------
+            // proved tu srandu
+            res = curl_easy_perform(curl);
+            if(res != CURLE_OK) {
+                //
+                goto cleanup;
+            }
+
+            // ---------------------------------------------------------------
+            // zjisteni vysledneho http response kodu
+            curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
+
             //
-            goto cleanup;
+            retCode = (response_code == 200);
+
+            //
+            cleanup:
+            //
+            curl_slist_free_all(headers);
+            curl_easy_cleanup(curl);
+        
+            //
+            return retCode;
         }
-
-        //
-        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
-
-        //
-        retCode = (response_code == 200);
-
-        //
-        cleanup:
-        //
-        curl_slist_free_all(headers);
-        curl_easy_cleanup(curl);
-        fclose(devnull);
-    
-        //
-        return retCode;
-    }
     };
 
     // -----------------------------------------------------------------------
     //
     template<typename COSI>
-    rstring __senco(const COSI &ins) {
+    rstring __senco(const COSI &ins, bool apos = false) {
         //
         std::stringstream _out;
 
         //
-        _out << "\"" << ins << "\"";
+        rstring _apos = (apos) ?  "\\\"" : "\"";
+
+        //
+        _out << _apos << ins << _apos;
 
         //
         return _out.str();
@@ -129,12 +139,12 @@ namespace mawscpp {
     // -----------------------------------------------------------------------
     //
     template<typename COSI>
-    rstring __jsonEnco(const rstring &key, const COSI &ins) {
+    rstring __jsonEnco(const rstring &key, const COSI &ins, bool apos = false) {
         //
         std::stringstream _out;
 
         //
-        _out << __senco(key) << ": " << __senco(ins); 
+        _out << __senco(key, apos) << ": " << __senco(ins, apos); 
 
         //
         return _out.str();
@@ -167,6 +177,16 @@ namespace mawscpp {
 
         //
         return _out.str();
+    }
+
+    // -----------------------------------------------------------------------
+    //
+    rstring __embr(const rstring &ee) {
+        //
+        std::stringstream _sout;
+
+        //
+        return _sout.str();
     }
 
     // -----------------------------------------------------------------------

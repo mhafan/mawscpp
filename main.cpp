@@ -12,11 +12,13 @@ int main(void)
     _e.name = "jjj";
     _e.content = "1,2,3";
 
-    //
+    /*
     if (_cn.post(_e.json()) == false) {
         //
         printf("Dosralo se to\n");
-    }
+    }*/
+
+    printf("%s\n", _e.json().c_str());
 
     //
     return 0;
