@@ -1,24 +1,34 @@
-#include "mawscpp.h"
+//
+#include "eman.hpp"
+#include "request.hpp"
 
+// -------------------------------------------------------------------------------
+//
+using namespace mawscpp;
  
-int main(void)
-{
+// -------------------------------------------------------------------------------
+//
+int main(void) {
     //
-    mawscpp::S3Export _e;
-    mawscpp::Connection _cn;
+    EManCFG cfg;
+
+    cfg.defaultS3Bucket = "mawsgo";
+    cfg.projectID = "cpp-testing";
 
     //
-    _e.project = "pokus";
-    _e.name = "jjj";
-    _e.content = "1,2,3";
+    EMan eman(cfg);
 
-    /*
-    if (_cn.post(_e.json()) == false) {
+    //
+    eman._j().experimentID = "uzfunguje";
+
+    //
+    eman.addFile(EManFile("pes.csv", "tralaala,1,koza"));
+
+    //
+    if (eman.post() == false) {
         //
-        printf("Dosralo se to\n");
-    }*/
-
-    printf("%s\n", _e.json().c_str());
+        printf("Nejaky errror\n");
+    }
 
     //
     return 0;

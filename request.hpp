@@ -1,19 +1,14 @@
+#ifndef requesthpp
+#define requesthpp
 
-#include <stdio.h>
+//
+#include "basics.hpp"
+#include "eman.hpp"
 #include <curl/curl.h>
-
-#include <string>
-#include <sstream>
-#include <vector>
 
 // ---------------------------------------------------------------------------
 // Rozhrani MAWSCPP - napojeni na moji AWS Lambda -> S3
 namespace mawscpp {
-    // -----------------------------------------------------------------------
-    //
-    typedef std::string rstring;
-    typedef std::vector<rstring> rstring_vec;
-
     // -----------------------------------------------------------------------
     // prebira ze systemovych promennych
     // MAWSGO_EXP_URL
@@ -47,6 +42,10 @@ namespace mawscpp {
         // -------------------------------------------------------------------
         //
         Connection(const rstring &anURL, const rstring &anKey) : url(anURL), appKey(anKey) {}
+
+        // -------------------------------------------------------------------
+        //
+        Connection(const EManCFG &cfg) : url(cfg.APIEndPoint), appKey(cfg.APIKey) {}
 
         // -------------------------------------------------------------------
         // HTTP POST na url+apiKey
@@ -118,96 +117,6 @@ namespace mawscpp {
             return retCode;
         }
     };
-
-    // -----------------------------------------------------------------------
-    //
-    template<typename COSI>
-    rstring __senco(const COSI &ins, bool apos = false) {
-        //
-        std::stringstream _out;
-
-        //
-        rstring _apos = (apos) ?  "\\\"" : "\"";
-
-        //
-        _out << _apos << ins << _apos;
-
-        //
-        return _out.str();
-    }
-
-    // -----------------------------------------------------------------------
-    //
-    template<typename COSI>
-    rstring __jsonEnco(const rstring &key, const COSI &ins, bool apos = false) {
-        //
-        std::stringstream _out;
-
-        //
-        _out << __senco(key, apos) << ": " << __senco(ins, apos); 
-
-        //
-        return _out.str();
-    }
-
-    // -----------------------------------------------------------------------
-    //
-    rstring __json(const rstring_vec &inv) {
-        //
-        std::stringstream _out;
-        auto _it = inv.begin();
-        
-        //
-        _out << "{";
-        //
-        while (_it != inv.end()) {
-            //
-            _out << *_it;
-            _it++;
-
-            //
-            if (_it != inv.end()) {
-                //
-                _out << ",";
-            }
-        }
-
-        //
-        _out << "}";
-
-        //
-        return _out.str();
-    }
-
-    // -----------------------------------------------------------------------
-    //
-    rstring __embr(const rstring &ee) {
-        //
-        std::stringstream _sout;
-
-        //
-        return _sout.str();
-    }
-
-    // -----------------------------------------------------------------------
-    // Zakladni udalost nasi mile Lambdy
-    struct S3Export {
-        //
-        rstring project;
-        rstring prefix;
-        rstring name;
-        rstring content;
-
-        //
-        rstring json() const {
-            //
-            return __json({
-                //
-                __jsonEnco("Project", project),
-                __jsonEnco("Prefix", prefix),
-                __jsonEnco("Name", name),
-                __jsonEnco("Content", content),
-            });
-        }
-    };
 }
+
+#endif /* requesthpp */

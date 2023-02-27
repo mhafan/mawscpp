@@ -1,30 +1,14 @@
 # C++ napojeni na moji MAWSGO lambdu
 
-Velmi osobni. 
+Velmi osobni. Smyslem je rozhrani na export vysledku z mych simulacnich experimentu, ktere jsou typicky implementovane v dockerech a bezi typicky v nejake virtualizaci, jako napr:
+- AWS Lambda
+- AWS Batch
+- Kubernetes vsech moznych typu
 
-## Demo
-```
-#include "mawscpp.h"
+## Architektura
 
- 
-int main(void)
-{
-    //
-    mawscpp::S3Export _e;
-    mawscpp::Connection _cn;
+Na mem AWS je RESTAPI/lambda prijimajici vstupni baliky dat/transakce. Podle zadani transakce umisti balik na patricne uloziste:
+- soubory do S3
+- ...
 
-    //
-    _e.project = "pokus";
-    _e.name = "jjj";
-    _e.content = "1,2,3";
-
-    //
-    if (_cn.post(_e.json()) == false) {
-        //
-        printf("Dosralo se to\n");
-    }
-
-    //
-    return 0;
-}
-```
+## Model
