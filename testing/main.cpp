@@ -1,13 +1,13 @@
-//
-#include <mawsgo.hpp>
+#include <mawsgocpp.hpp>
 
 // -------------------------------------------------------------------------------
 //
 using namespace mawscpp;
- 
-// -------------------------------------------------------------------------------
+
+mawscpp::Globals mawscpp::_G;
+
 //
-int main(void) {
+int main() {
     //
     EManCFG cfg;
 
@@ -18,7 +18,7 @@ int main(void) {
     EMan eman(cfg);
 
     //
-    eman._j().experimentID = "uzfunguje";
+    eman().experimentID = "uzfunguje-2";
 
     //
     eman.addFile(EManFile("pes.csv", "tralaala,1,koza"));
