@@ -9,3 +9,4 @@ clean:
 	
 docker:
 	docker build -t mawsgo:cpp . 
+	
