@@ -1,12 +1,11 @@
 #
-CXXFLAGS=-std=c++11 -fPIC
+CXXFLAGS=-std=c++11 -fPIC -I ../ -I/usr/local/include
 
-all: main.o
-	g++ -std=c++11 -L/usr/local/lib main.o -o main -lmawsgo -lcurl
-
-main.o: main.cpp
-	g++ -std=c++11 -c -I/usr/local/include main.cpp
+all:
+	g++ $(CXXFLAGS) main.cpp -o main -lcurl
 
 clean:
 	rm -f main *.o dep *.a
 	
+docker:
+	docker build -t mawsgo:cpp . 
