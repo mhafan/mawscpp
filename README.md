@@ -12,3 +12,19 @@ Na mem AWS je RESTAPI/lambda prijimajici vstupni baliky dat/transakce. Podle zad
 - ...
 
 ## Model
+
+## Integrace
+
+Toto pridat do Dockerfile:
+```
+WORKDIR /src
+RUN git clone https://github.com/mhafan/mawscpp.git 
+WORKDIR /src/mawscpp
+RUN make install
+```
+
+Pak se ocekava nejak dodat dve esencialni informace:
+- ENV_EGATE_ENDPOINT
+- ENV_EGATE_APIKEY
+
+### Zapojeni v programu
